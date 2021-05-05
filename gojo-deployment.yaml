@@ -1,0 +1,43 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  namespace: ctfd
+  name: ctfd-gojo
+  labels:
+    app: ctfd-gojo
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: ctfd-gojo
+  strategy:
+    type: Recreate
+  template:
+    metadata:
+      labels:
+        app: ctfd-gojo
+    spec:
+      containers:
+      - image: alishagupta10/gojo
+        name: ctfd-gojo
+      restartPolicy: Always
+---
+apiVersion: v1
+kind: Service
+metadata:
+  namespace: ctfd
+  metadata:
+  annotations:
+    beta.cloud.google.com/backend-config: '{"default": "ctf-backend"}'
+    cloud.google.com/neg: '{"exposed_ports": {"8081":{"name": "ctfd-gojo-neg-8081"}}}'
+  labels:
+    app: ctfd-gojo
+  name: ctfd-gojo
+spec:
+  ports:
+  - name: proxy
+    port: 8081
+    protocol: TCP
+    targetPort: 80
+  selector:
+    app: ctfd-gojo

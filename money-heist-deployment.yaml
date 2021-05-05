@@ -1,0 +1,43 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  namespace: ctfd
+  name: ctfd-money-heist
+  labels:
+    app: ctfd-money-heist
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: ctfd-money-heist
+  strategy:
+    type: Recreate
+  template:
+    metadata:
+      labels:
+        app: ctfd-money-heist
+    spec:
+      containers:
+      - image: r0hi7/money-heist
+        name: ctfd-money-heist
+      restartPolicy: Always
+---
+apiVersion: v1
+kind: Service
+metadata:
+  namespace: ctfd
+  metadata:
+  annotations:
+    beta.cloud.google.com/backend-config: '{"default": "ctf-backend"}'
+    cloud.google.com/neg: '{"exposed_ports": {"8088":{"name": "ctfd-money-heist-neg-8088"}}}'
+  labels:
+    app: ctfd-money-heist
+  name: ctfd-money-heist
+spec:
+  ports:
+  - name: proxy
+    port: 8088
+    protocol: TCP
+    targetPort: 80
+  selector:
+    app: ctfd-money-heist

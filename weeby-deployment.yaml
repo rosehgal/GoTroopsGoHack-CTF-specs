@@ -1,0 +1,43 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  namespace: ctfd
+  name: ctfd-weeby
+  labels:
+    app: ctfd-weeby
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: ctfd-weeby
+  strategy:
+    type: Recreate
+  template:
+    metadata:
+      labels:
+        app: ctfd-weeby
+    spec:
+      containers:
+      - image: r0hi7/weeby
+        name: ctfd-weeby
+      restartPolicy: Always
+---
+apiVersion: v1
+kind: Service
+metadata:
+  namespace: ctfd
+  metadata:
+  annotations:
+    beta.cloud.google.com/backend-config: '{"default": "ctf-backend"}'
+    cloud.google.com/neg: '{"exposed_ports": {"8083":{"name": "ctfd-weeby-neg-8083"}}}'
+  labels:
+    app: ctfd-weeby
+  name: ctfd-weeby
+spec:
+  ports:
+  - name: proxy
+    port: 8083
+    protocol: TCP
+    targetPort: 80
+  selector:
+    app: ctfd-weeby

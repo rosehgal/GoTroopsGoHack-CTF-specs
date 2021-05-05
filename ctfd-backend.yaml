@@ -1,0 +1,11 @@
+# Backend config for IAP
+apiVersion: cloud.google.com/v1
+kind: BackendConfig
+metadata:
+  name: ctf-backend
+  namespace: ctfd
+spec:
+  iap:
+    enabled: false
+    oauthclientCredentials:
+      secretName: ctf-goseccon-client

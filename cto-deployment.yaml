@@ -1,0 +1,43 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  namespace: ctfd
+  name: ctfd-cto
+  labels:
+    app: ctfd-cto
+spec:
+  replicas: 5
+  selector:
+    matchLabels:
+      app: ctfd-cto
+  strategy:
+    type: Recreate
+  template:
+    metadata:
+      labels:
+        app: ctfd-cto
+    spec:
+      containers:
+      - image: snehaanand/crypto_clg
+        name: ctfd-cto
+      restartPolicy: Always
+---
+apiVersion: v1
+kind: Service
+metadata:
+  namespace: ctfd
+  metadata:
+  annotations:
+    beta.cloud.google.com/backend-config: '{"default": "ctf-backend"}'
+    cloud.google.com/neg: '{"exposed_ports": {"8084":{"name": "ctfd-cto-neg-8084"}}}'
+  labels:
+    app: ctfd-cto
+  name: ctfd-cto
+spec:
+  ports:
+  - name: proxy
+    port: 8084
+    protocol: TCP
+    targetPort: 80
+  selector:
+    app: ctfd-cto

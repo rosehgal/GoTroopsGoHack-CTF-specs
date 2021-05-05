@@ -1,0 +1,43 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  namespace: ctfd
+  name: ctfd-lorem
+  labels:
+    app: ctfd-lorem
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: ctfd-lorem
+  strategy:
+    type: Recreate
+  template:
+    metadata:
+      labels:
+        app: ctfd-lorem
+    spec:
+      containers:
+      - image: r0hi7/lorem
+        name: ctfd-lorem
+      restartPolicy: Always
+---
+apiVersion: v1
+kind: Service
+metadata:
+  namespace: ctfd
+  metadata:
+  annotations:
+    beta.cloud.google.com/backend-config: '{"default": "ctf-backend"}'
+    cloud.google.com/neg: '{"exposed_ports": {"8082":{"name": "ctfd-lorem-neg-8082"}}}'
+  labels:
+    app: ctfd-lorem
+  name: ctfd-lorem
+spec:
+  ports:
+  - name: proxy
+    port: 8082
+    protocol: TCP
+    targetPort: 80
+  selector:
+    app: ctfd-lorem

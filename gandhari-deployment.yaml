@@ -1,0 +1,43 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  namespace: ctfd
+  name: ctfd-gandhari
+  labels:
+    app: ctfd-gandhari
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: ctfd-gandhari
+  strategy:
+    type: Recreate
+  template:
+    metadata:
+      labels:
+        app: ctfd-gandhari
+    spec:
+      containers:
+      - image: r0hi7/gandhari
+        name: ctfd-gandhari
+      restartPolicy: Always
+---
+apiVersion: v1
+kind: Service
+metadata:
+  namespace: ctfd
+  metadata:
+  annotations:
+    beta.cloud.google.com/backend-config: '{"default": "ctf-backend"}'
+    cloud.google.com/neg: '{"exposed_ports": {"8087":{"name": "ctfd-gandhari-neg-8087"}}}'
+  labels:
+    app: ctfd-gandhari
+  name: ctfd-gandhari
+spec:
+  ports:
+  - name: proxy
+    port: 8087
+    protocol: TCP
+    targetPort: 80
+  selector:
+    app: ctfd-gandhari

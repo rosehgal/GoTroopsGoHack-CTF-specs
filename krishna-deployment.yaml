@@ -1,0 +1,43 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  namespace: ctfd
+  name: ctfd-krishna
+  labels:
+    app: ctfd-krishna
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: ctfd-krishna
+  strategy:
+    type: Recreate
+  template:
+    metadata:
+      labels:
+        app: ctfd-krishna
+    spec:
+      containers:
+      - image: r0hi7/krishna
+        name: ctfd-krishna
+      restartPolicy: Always
+---
+apiVersion: v1
+kind: Service
+metadata:
+  namespace: ctfd
+  metadata:
+  annotations:
+    beta.cloud.google.com/backend-config: '{"default": "ctf-backend"}'
+    cloud.google.com/neg: '{"exposed_ports": {"8086":{"name": "ctfd-krishna-neg-8086"}}}'
+  labels:
+    app: ctfd-krishna
+  name: ctfd-krishna
+spec:
+  ports:
+  - name: proxy
+    port: 8086
+    protocol: TCP
+    targetPort: 8080
+  selector:
+    app: ctfd-krishna

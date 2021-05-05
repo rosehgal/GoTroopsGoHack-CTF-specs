@@ -1,0 +1,43 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  namespace: ctfd
+  name: ctfd-monty
+  labels:
+    app: ctfd-monty
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: ctfd-monty
+  strategy:
+    type: Recreate
+  template:
+    metadata:
+      labels:
+        app: ctfd-monty
+    spec:
+      containers:
+      - image: r0hi7/monty
+        name: ctfd-monty
+      restartPolicy: Always
+---
+apiVersion: v1
+kind: Service
+metadata:
+  namespace: ctfd
+  metadata:
+  annotations:
+    beta.cloud.google.com/backend-config: '{"default": "ctf-backend"}'
+    cloud.google.com/neg: '{"exposed_ports": {"8085":{"name": "ctfd-monty-neg-8085v2"}}}'
+  labels:
+    app: ctfd-monty
+  name: ctfd-monty
+spec:
+  ports:
+  - name: proxy
+    port: 8085
+    protocol: TCP
+    targetPort: 8080
+  selector:
+    app: ctfd-monty
